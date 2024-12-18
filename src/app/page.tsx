@@ -1,5 +1,5 @@
 'use client';
-import { useState, KeyboardEvent, useEffect } from 'react';
+import { useState, useEffect, KeyboardEvent, useCallback } from 'react';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -97,13 +97,7 @@ export default function Home() {
     }
   }, []);
 
-  useEffect(() => {
-    // Check for due tasks every minute
-    const interval = setInterval(checkDueTasks, 60000);
-    return () => clearInterval(interval);
-  }, [todos]);
-
-  const checkDueTasks = () => {
+  const checkDueTasks = useCallback(() => {
     const now = new Date();
     todos.forEach(todo => {
       if (
@@ -116,7 +110,11 @@ export default function Home() {
         scheduleNotification(todo);
       }
     });
-  };
+  }, [todos, scheduleNotification]);
+
+  useEffect(() => {
+    checkDueTasks();
+  }, [checkDueTasks]);
 
   const scheduleNotification = (todo: Todo) => {
     if (!todo.dueDate || !("Notification" in window)) return;
