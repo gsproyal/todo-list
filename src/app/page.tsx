@@ -97,31 +97,31 @@ export default function Home() {
     }
   }, []);
 
-  const scheduleNotification = useCallback((todo: Todo) => {
-    if (!todo.dueDate || !("Notification" in window)) return;
-
-    const timeUntilDue = todo.dueDate.getTime() - new Date().getTime() - 600000; // 10 minutes before
-    
-    if (timeUntilDue <= 0) return;
-
-    setTimeout(() => {
-      if (Notification.permission === "granted" && !todo.completed) {
-        new Notification("Task Due Soon!", {
-          body: `"${todo.text}" is due in 10 minutes!`,
-          icon: "/favicon.ico"
-        });
-      }
-    }, timeUntilDue);
-
-    // Mark notification as scheduled
-    setTodos(todos => todos.map(t => 
-      t.id === todo.id 
-        ? { ...t, notificationScheduled: true } 
-        : t
-    ));
-  }, []);
-
   const checkDueTasks = useCallback(() => {
+    const scheduleNotification = (todo: Todo) => {
+      if (!todo.dueDate || !("Notification" in window)) return;
+
+      const timeUntilDue = todo.dueDate.getTime() - new Date().getTime() - 600000; // 10 minutes before
+      
+      if (timeUntilDue <= 0) return;
+
+      setTimeout(() => {
+        if (Notification.permission === "granted" && !todo.completed) {
+          new Notification("Task Due Soon!", {
+            body: `"${todo.text}" is due in 10 minutes!`,
+            icon: "/favicon.ico"
+          });
+        }
+      }, timeUntilDue);
+
+      // Mark notification as scheduled
+      setTodos(todos => todos.map(t => 
+        t.id === todo.id 
+          ? { ...t, notificationScheduled: true } 
+          : t
+      ));
+    };
+
     const now = new Date();
     todos.forEach(todo => {
       if (
@@ -134,7 +134,7 @@ export default function Home() {
         scheduleNotification(todo);
       }
     });
-  }, [todos, scheduleNotification]);
+  }, [todos]);
 
   useEffect(() => {
     checkDueTasks();
